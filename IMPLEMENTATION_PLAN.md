@@ -278,6 +278,91 @@ frontend/src/app/
 
 ---
 
+## PHASE 7 — UI Redesign & Branding
+> Complete visual overhaul of both Editor and History pages with a professional dark-sidebar layout using colors extracted from the RSP logo.
+
+### 7.1 Logo Color Palette (extracted via Python PIL)
+| Role | Hex | Usage |
+|---|---|---|
+| Deep Navy | `#0d0d2e` | Sidebar background, page titles |
+| Navy Mid | `#1e1e4b` | Save button gradient |
+| Deep Purple | `#2d0f4b` | Active nav bg, gradient ends, left border accents |
+| Magenta | `#85073f` | Generate button, active nav indicator, error text |
+| Slate | `#5a5a78` | Dividers, version text |
+| Lavender | `#8c8ca0` | Muted descriptions, secondary text |
+| Soft Lilac | `#b8a0c8` | "Synapse Creative Media" sidebar text |
+
+### 7.2 Layout — Dark Sidebar + Light Content
+- [x] Fixed left sidebar (220px, `#0d0d2e`) with logo, brand text, nav links
+- [x] Sidebar collapses to 60px icon-only on mobile (≤768px)
+- [x] Main content area: `#f5f4f9` (subtle purple-tinted background)
+- [x] Sticky sidebar — always visible while scrolling
+- [x] Navigation-ready structure — future items can be added as `sidebar-nav-item` entries
+
+### 7.3 Sidebar Brand Block
+```
+[logo]  RSP
+        A unit of
+        Synapse Creative Media
+```
+- [x] RSP logo (44px rounded square) with magenta glow shadow
+- [x] "RSP" — bold white, large
+- [x] "A unit of" — tiny muted grey
+- [x] "Synapse Creative Media" — soft lilac
+- [x] Bottom: `v1.0 · RSP Publisher` + `© 2026 Ranchi Samachar Patrika`
+
+### 7.4 Sidebar Navigation
+- [x] Editor nav item (active on editor page) — magenta highlight + left accent bar
+- [x] History nav item (active on history page)
+- [x] Active state: `rgba(133,7,83,0.18)` background + `#e879b8` text + 3px left bar
+- [x] Hover state: subtle white overlay
+- [x] Commented placeholder slots for future nav items (Analytics, Settings, etc.)
+
+### 7.5 Editor Page Redesign
+- [x] Removed old top header bar
+- [x] Page title "News Editor" + subtitle
+- [x] Panels replace cards — `16px` border-radius, soft shadow, no colored top border
+- [x] Panel header: colored icon badge (magenta→purple gradient) + title + description
+- [x] Generate button: magenta→purple gradient with drop shadow + hover lift
+- [x] Save button: navy gradient
+- [x] Error banner: pink-tinted background matching magenta theme
+- [x] Removed "AI Ready" status chip
+- [x] Removed footer text from main content area
+
+### 7.6 History Page Redesign
+- [x] Same sidebar as Editor (History nav item active)
+- [x] Page header with title, subtitle, search field top-right
+- [x] Post cards: white, `14px` border-radius, hover lift shadow
+- [x] Raw preview: `#f9f8fc` background with `#2d0f4b` left border
+- [x] Content preview (expanded): `#85073f` magenta left border
+- [x] Empty state: magenta icon circle + styled title/subtitle
+- [x] Delete button turns magenta on hover
+- [x] Category badges retain their original colors
+
+### 7.7 Assets
+- [x] `rsp-logo.jpg` copied to `frontend/public/rsp-logo.jpg`
+- [x] `rsp-banner.png` copied to `frontend/public/rsp-banner.png` (available for future use)
+
+### 7.8 Files Changed
+- [x] `editor.component.html` — full rewrite with sidebar + panel layout
+- [x] `editor.component.scss` — full rewrite with logo color theme
+- [x] `editor.component.ts` — added `currentYear` property
+- [x] `history.component.html` — full rewrite matching sidebar layout
+- [x] `history.component.scss` — full rewrite matching logo color theme
+- [x] `styles.scss` — cleaned up old responsive overrides
+
+### 7.9 Testing Checklist
+- [x] Editor page renders with sidebar and correct colors
+- [x] History page renders with sidebar and correct colors
+- [x] Active nav item highlights correctly on each page
+- [x] Sidebar collapses to icons on mobile
+- [x] Logo loads from `public/rsp-logo.jpg`
+- [x] All existing functionality (generate, copy, save, delete) unchanged
+- [x] Build passes with zero errors ✅
+- [x] **PHASE 7 COMPLETE** — UI Redesign & Branding ✅
+
+---
+
 ## PHASE 4 — Integration & Full App Testing
 
 ### 4.1 End-to-End Flow Testing
@@ -346,53 +431,48 @@ frontend/src/app/
   - Per-caption: text align (L/C/R), text colour picker, background colour picker
   - Fixed: colour picker not opening (`hidden` → `opacity:0` CSS fix)
   - Fixed: uploaded image not rendering in template (pass `selectedFile` directly to `canvas.service`)
+- [x] **PHASE 7 COMPLETE** — UI Redesign & Branding ✅
+  - Dark sidebar layout with RSP logo color palette
+  - Colors extracted from logo: navy `#0d0d2e`, purple `#2d0f4b`, magenta `#85073f`
+  - Sidebar brand: RSP + "A unit of" + "Synapse Creative Media" + copyright
+  - Editor & History pages fully redesigned and theme-matched
+  - Navigation-ready sidebar structure for future features
 
 ---
 
 ## UI Design Reference
 
-### Editor Page
+### Editor Page (Phase 7 — Current)
 ```
-┌──────────────────────────────────────────────────────────┐
-│  🗞️ RSP News Publisher                       [📋 History]│
-├──────────────────────────────────────────────────────────┤
-│  Category: [Breaking News ▼]   Language: [Hindi ▼]       │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │  Paste your raw news content here...               │  │
-│  │                                                    │  │
-│  └────────────────────────────────────────────────────┘  │
-│                             [✨ Generate Content]         │
-├──────────────────────────────────────────────────────────┤
-│  [Facebook] [Instagram] [Twitter/X]                      │
-│  ┌────────────────────────────────────────────────────┐  │
-│  │  (Editable textarea — generated content)           │  │
-│  │                                280/500 chars       │  │
-│  └────────────────────────────────────────────────────┘  │
-│                              [📋 Copy Facebook Content]  │
-├──────────────────────────────────────────────────────────┤
-│  IMAGE EDITOR                                            │
-│  Template: [Breaking News ▼]  [📁 Upload News Photo]     │
-│  Caption:  [____________________________] (editable)     │
-│  ┌──────────────────────┐                               │
-│  │   1080x1080 Preview  │                               │
-│  └──────────────────────┘                               │
-│  [🔄 Generate Preview]        [⬇️ Download Image]        │
-├──────────────────────────────────────────────────────────┤
-│                          [💾 Save to History]            │
-└──────────────────────────────────────────────────────────┘
+┌─────────────┬────────────────────────────────────────────┐
+│  [logo]     │  News Editor                               │
+│  RSP        │  Generate AI-powered content...            │
+│  A unit of  ├────────────────────────────────────────────┤
+│  Synapse    │  ┌ 🔴 Raw News Content ─────────────────┐  │
+│  Creative   │  │  Category ▼   Language ▼             │  │
+│  Media      │  │  [textarea]                          │  │
+│             │  │              [✨ Generate Content]   │  │
+│  ── Nav ──  │  └──────────────────────────────────────┘  │
+│  ✏️ Editor  │  ┌ 🟣 Generated Content ────────────────┐  │
+│  📋 History │  │  [FB] [IG] [TW] tabs                 │  │
+│             │  │  [textarea]  [📋 Copy]               │  │
+│  ─────────  │  │  [💾 Save]  [↗ Save & History]       │  │
+│  v1.0 RSP   │  └──────────────────────────────────────┘  │
+│  © 2026 RSP │  ┌ Image Editor ────────────────────────┐  │
+└─────────────┴──┴──────────────────────────────────────┴──┘
 ```
 
-### History Page
+### History Page (Phase 7 — Current)
 ```
-┌──────────────────────────────────────────────────────────┐
-│  📋 Post History                    [🔍 Search] [← Back] │
-├──────────────────────────────────────────────────────────┤
-│  ┌────────────────────────────────────────────────────┐  │
-│  │ 🔴 Breaking News  •  12 Jan 2025, 2:30 PM          │  │
-│  │ "रिकॉर्ड 68,000+ सेवा आदेश जारी..."               │  │
-│  │ [📋 Copy FB] [📋 Copy IG] [📋 Copy TW] [🗑 Delete] │  │
-│  └────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────┘
+┌─────────────┬────────────────────────────────────────────┐
+│  [logo]     │  Post History          [🔍 Search...]      │
+│  RSP        │  Browse, preview and re-copy saved posts   │
+│  ...        ├────────────────────────────────────────────┤
+│  ✏️ Editor  │  ┌─────────────────────────────────────┐   │
+│  📋 History │  │ 🔴 Breaking News  Hindi  12 Jan 2026 🗑│  │
+│  (active)   │  │ "रिकॉर्ड 68,000+ सेवा आदेश जारी..." │  │
+│             │  │ [Copy Facebook ▼] [Copy IG ▼] [Copy TW ▼]│
+└─────────────┴──┴─────────────────────────────────────┴───┘
 ```
 
 ---
