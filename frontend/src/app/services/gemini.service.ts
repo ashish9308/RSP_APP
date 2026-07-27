@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { GeneratedContent } from '../models/post.model';
+import { GeneratedContent, ValidationResult } from '../models/post.model';
 import { AuthService } from './auth.service';
 
 @Injectable({ providedIn: 'root' })
@@ -19,6 +19,16 @@ export class GeminiService {
       this.http.post<GeneratedContent>(
         `${environment.apiUrl}/generate`,
         { content, category, language },
+        { headers: this.headers() }
+      )
+    );
+  }
+
+  validateContent(content: string): Promise<ValidationResult> {
+    return firstValueFrom(
+      this.http.post<ValidationResult>(
+        `${environment.apiUrl}/validate`,
+        { content },
         { headers: this.headers() }
       )
     );

@@ -16,8 +16,9 @@ const authRouter = require('./routes/auth');
 app.use('/api/auth', authRouter);
 
 // Protected routes
-app.use('/api/generate', authMiddleware, require('./routes/generate'));
-app.use('/api/posts',    authMiddleware, require('./routes/posts'));
+app.use('/api/generate',  authMiddleware, require('./routes/generate'));
+app.use('/api/validate',  authMiddleware, require('./routes/validate'));
+app.use('/api/posts',     authMiddleware, require('./routes/posts'));
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

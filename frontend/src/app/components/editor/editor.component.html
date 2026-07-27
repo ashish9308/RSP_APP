@@ -109,6 +109,52 @@
       </div>
     </div>
 
+    <!-- ── Validation Panel ── -->
+    <div class="panel validation-panel" *ngIf="isValidating || validation"
+         [style.background]="validation ? getValidationBg() : '#f5f4f9'">
+      <div class="panel-header">
+        <div class="panel-icon-wrap" [style.background]="validation ? getValidationColor() : '#aaa'">
+          <mat-icon>fact_check</mat-icon>
+        </div>
+        <div>
+          <div class="panel-title">News Validation</div>
+          <div class="panel-desc">AI credibility check on your news content</div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="validation-loading" *ngIf="isValidating">
+        <mat-spinner diameter="24"></mat-spinner>
+        <span>Validating news credibility...</span>
+      </div>
+
+      <!-- Result -->
+      <div class="validation-result" *ngIf="validation && !isValidating">
+        <div class="validation-score-row">
+          <div class="score-circle" [style.border-color]="getValidationColor()" [style.color]="getValidationColor()">
+            {{ validation.score }}%
+          </div>
+          <div class="score-details">
+            <div class="verdict-badge" [style.background]="getValidationColor()">{{ validation.verdict }}</div>
+            <p class="validation-summary">{{ validation.summary }}</p>
+          </div>
+        </div>
+
+        <div class="sources-section" *ngIf="validation.sources?.length">
+          <div class="sources-title"><mat-icon>link</mat-icon> Reference Sources</div>
+          <div class="source-chips">
+            <a *ngFor="let src of validation.sources"
+               [href]="src.url || '#'" target="_blank" rel="noopener"
+               class="source-chip"
+               [class.no-link]="!src.url">
+              <mat-icon>open_in_new</mat-icon>
+              {{ src.name }}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Generated Content Panel ── -->
     <div class="panel" *ngIf="generated">
       <div class="panel-header">

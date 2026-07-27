@@ -12,7 +12,11 @@ const PostSchema = new mongoose.Schema({
     facebook: { type: Boolean, default: false },
     instagram: { type: Boolean, default: false },
     twitter: { type: Boolean, default: false }
-  }
+  },
+  validationScore: { type: Number, default: null },
+  validationVerdict: { type: String, default: '' },
+  validationSummary: { type: String, default: '' },
+  validationSources: { type: Array, default: [] }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Post', PostSchema);

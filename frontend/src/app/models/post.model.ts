@@ -13,6 +13,10 @@ export interface Post {
     instagram: boolean;
     twitter: boolean;
   };
+  validationScore?: number | null;
+  validationVerdict?: string;
+  validationSummary?: string;
+  validationSources?: { name: string; url: string }[];
   createdAt: Date;
 }
 
@@ -21,6 +25,13 @@ export interface GeneratedContent {
   instagram: string;
   twitter: string;
   imageCaption: string;
+}
+
+export interface ValidationResult {
+  score: number;
+  verdict: string;
+  summary: string;
+  sources: { name: string; url: string }[];
 }
 
 export const CATEGORIES = [

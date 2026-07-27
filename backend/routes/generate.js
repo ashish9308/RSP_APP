@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { GoogleGenAI } = require('@google/genai');
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 router.post('/', async (req, res) => {
   const { content, category, language } = req.body;
@@ -29,8 +28,11 @@ Return ONLY valid JSON. No explanation, no markdown, no extra text.
   `;
 
   try {
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().replace(/```json|```/g, '').trim();
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.5-flash',
+      contents: prompt
+    });
+    const text = response.text.replace(/```json|```/g, '').trim();
     res.json(JSON.parse(text));
   } catch (err) {
     console.error('Gemini error:', err.message);

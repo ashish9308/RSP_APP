@@ -131,6 +131,13 @@ export class HistoryComponent implements OnInit {
     this.router.navigate(['/']);
   }
 
+  getValidationColor(score: number): string {
+    if (score >= 80) return '#2e7d32';
+    if (score >= 60) return '#f57f17';
+    if (score >= 40) return '#e65100';
+    return '#c62828';
+  }
+
   getCategoryColor(category: string): string {
     const colors: Record<string, string> = {
       'Breaking News': '#c62828',

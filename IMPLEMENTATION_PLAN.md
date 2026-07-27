@@ -13,7 +13,7 @@ A web application for **Ranchi Samachar Patrika** to automate news content gener
 | Local Storage (Phase 1) | IndexedDB via Dexie.js | Free |
 | Backend | Node.js + Express | Free |
 | Database | MongoDB (Local) | Free |
-| AI Content | Google Gemini API | Free (1500 req/day) |
+| AI Content | Google Gemini API (`@google/genai` SDK, `gemini-2.5-flash`) | Free (1500 req/day) |
 | Image Processing | HTML5 Canvas API | Free |
 | **TOTAL** | | **₹0 / $0** |
 
@@ -108,8 +108,9 @@ frontend/src/app/
   > Always put template images in `frontend/public/templates/`
 
 ### 1.9 Get Gemini API Key ⬅️ YOUR ACTION NEEDED
-- [x] API key added to `frontend/src/environments/environment.ts`
-- [x] Gemini model set to `gemini-3.6-flash` (confirmed working)
+- [x] Gemini API key stored in `backend/.env` as `GEMINI_API_KEY`
+- [x] Gemini SDK: `@google/genai` (new SDK) — `npm install @google/genai` in backend
+- [x] Gemini model: `gemini-2.5-flash` ✅ confirmed working
 
 ### 1.10 Phase 1 Testing Checklist
 - [x] `ng build` runs without errors
@@ -444,6 +445,69 @@ frontend/src/app/
   - Angular `authGuard` protects editor + history routes
   - Login page: split layout with RSP banner + themed form
   - Both sidebars show user avatar (initials), name, role, logout button
+- [x] **PHASE 9 COMPLETE** — News Validation + UI Fixes ✅
+  - AI fact-check runs in parallel with content generation
+  - Validation score (0–100%), verdict, summary, and sources shown in editor
+  - Validation data saved to MongoDB and displayed in history
+  - Login page updated: banner fills left panel (no overlay), brand block on form side
+  - Favicon replaced with RSP logo (`rsp-logo.png`), page title set to "RSP News Publisher"
+  - Debug console logs removed from backend
+  - Gemini SDK migrated from `@google/generative-ai` → `@google/genai`
+  - Model confirmed working: `gemini-2.5-flash` with new SDK
+
+---
+
+## PHASE 9 — News Validation + UI Fixes ✅
+> AI-powered fact-checking on news content, login page polish, favicon, and Gemini SDK upgrade.
+
+### 9.1 News Validation Feature
+- [x] `backend/routes/validate.js` — new `POST /api/validate` endpoint using Gemini
+  - Returns: `score` (0–100), `verdict`, `summary`, `sources[]`
+  - Verdict scale: Verified / Likely True / Unverified / Likely False / False
+- [x] `backend/models/Post.js` — added fields: `validationScore`, `validationVerdict`, `validationSummary`, `validationSources`
+- [x] `backend/server.js` — `/api/validate` registered as JWT-protected route
+- [x] `frontend/models/post.model.ts` — added `ValidationResult` interface + validation fields to `Post`
+- [x] `frontend/services/gemini.service.ts` — added `validateContent()` method
+- [x] `editor.component.ts` — generate + validate run in parallel via `Promise.all`; validation saved with post
+- [x] `editor.component.html` — validation panel between raw news and generated content panels
+  - Score circle, verdict badge, summary text, clickable source chips
+  - Panel background color changes based on score (green/yellow/orange/red)
+- [x] `history.component.ts` — added `getValidationColor()` helper
+- [x] `history.component.html` — each post card shows validation badge + sources
+- [x] CSS budget in `angular.json` increased from `8kB` → `32kB` (error limit)
+
+### 9.2 Login Page Updates
+- [x] Removed gradient overlay from banner — banner now shows clean
+- [x] Brand block added to form side: RSP logo + "Ranchi Samachar Patrika" + "A unit of Synapse Creative Media"
+- [x] Tested full-screen banner layout (reverted — left/right split kept as final)
+- [x] Login page layout: banner fills left panel, form card on right with brand block at top
+
+### 9.3 Favicon & Page Title
+- [x] `frontend/public/rsp-logo.png` — RSP logo converted to PNG (64×64) via `sips`
+- [x] `frontend/src/index.html` — favicon points to `rsp-logo.png`, title set to `RSP News Publisher`
+
+### 9.4 Gemini SDK Migration ⚠️ IMPORTANT
+- [x] Uninstalled old SDK: `@google/generative-ai`
+- [x] Installed new SDK: `npm install @google/genai`
+- [x] `backend/routes/generate.js` — migrated to new SDK
+- [x] `backend/routes/validate.js` — migrated to new SDK
+- [x] Model: `gemini-2.5-flash` ✅ confirmed working with new SDK
+- See **Key Lessons Learned → #4** for correct usage pattern
+
+### 9.5 Backend Cleanup
+- [x] Removed all debug `console.log` statements from `server.js` and `routes/auth.js`
+
+### 9.6 Testing Checklist
+- [x] Generate content → validation panel appears with score, verdict, summary, sources
+- [x] Score color changes correctly (green ≥80, yellow ≥60, orange ≥40, red <40)
+- [x] Save post → validation data persisted in MongoDB
+- [x] History page shows validation badge on each saved post
+- [x] Source chips are clickable links
+- [x] Login page brand block visible on form side
+- [x] Favicon shows RSP logo in browser tab
+- [x] Page title shows "RSP News Publisher"
+- [x] Build passes with zero errors ✅
+- [x] **PHASE 9 COMPLETE** ✅
 
 ---
 
@@ -541,10 +605,26 @@ frontend/src/app/
 - Footer (red, caption): `y=1066` to `y=1280` (214px)
 - Draw header and footer separately from template — do NOT draw full template on top of photo
 
-### 4. Gemini Model
-- Use `gemini-2.5-flash` — confirmed working with this API key
-- `gemini-3.6-flash` returns 503 (high demand/unavailable)
-- `gemini-2.0-flash` returns 404 for this account
+### 4. Gemini Model & SDK
+- ⚠️ **Old SDK:** `@google/generative-ai` — DEPRECATED, do NOT use
+- ✅ **New SDK:** `@google/genai` — install with `npm install @google/genai`
+- ✅ **Working model:** `gemini-2.5-flash` with new SDK
+- ❌ `gemini-2.5-flash` with old SDK → 404 (model no longer available to new users via old SDK)
+- ❌ `gemini-3.6-flash` → 503 (high demand/unavailable)
+- ❌ `gemini-2.0-flash` → 404 for this account
+- ❌ `gemini-2.0-flash-lite` → tested but replaced with 2.5-flash
+
+**Correct usage (both generate.js and validate.js):**
+```javascript
+const { GoogleGenAI } = require('@google/genai');
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const response = await ai.models.generateContent({
+  model: 'gemini-2.5-flash',
+  contents: prompt
+});
+const text = response.text.replace(/```json|```/g, '').trim();
+```
 
 ### 5. Phase 2 — post.service.ts Migration Note
 When migrating from IndexedDB to backend API in Phase 2+:

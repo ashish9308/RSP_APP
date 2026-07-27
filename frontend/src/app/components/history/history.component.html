@@ -90,6 +90,22 @@
 
       <p class="raw-preview">{{ post.rawContent | slice:0:140 }}{{ post.rawContent.length > 140 ? '...' : '' }}</p>
 
+      <!-- Validation Badge -->
+      <div class="validation-row" *ngIf="post.validationScore != null">
+        <div class="val-score-badge" [style.background]="getValidationColor(post.validationScore!)" >
+          <mat-icon>fact_check</mat-icon>
+          {{ post.validationScore }}% · {{ post.validationVerdict }}
+        </div>
+        <span class="val-summary">{{ post.validationSummary }}</span>
+      </div>
+      <div class="val-sources" *ngIf="post.validationSources?.length">
+        <a *ngFor="let src of post.validationSources"
+           [href]="src.url || '#'" target="_blank" rel="noopener"
+           class="source-chip" [class.no-link]="!src.url">
+          <mat-icon>open_in_new</mat-icon>{{ src.name }}
+        </a>
+      </div>
+
       <div class="platform-actions">
 
         <!-- Facebook -->

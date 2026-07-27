@@ -14,7 +14,7 @@ import { MatCardModule } from '@angular/material/card';
 import { GeminiService } from '../../services/gemini.service';
 import { PostService } from '../../services/post.service';
 import { AuthService } from '../../services/auth.service';
-import { CATEGORIES, LANGUAGES, GeneratedContent } from '../../models/post.model';
+import { CATEGORIES, LANGUAGES, GeneratedContent, ValidationResult } from '../../models/post.model';
 import { ImageEditorComponent } from '../image-editor/image-editor.component';
 
 @Component({
@@ -48,6 +48,9 @@ export class EditorComponent {
   saved = false;
   geminiError = '';
 
+  validation: ValidationResult | null = null;
+  isValidating = false;
+
   readonly twitterLimit = 280;
   readonly currentYear = new Date().getFullYear();
 
@@ -66,23 +69,32 @@ export class EditorComponent {
       return;
     }
     this.isGenerating = true;
+    this.isValidating = true;
     this.geminiError = '';
     this.saved = false;
+    this.validation = null;
     this.cdr.markForCheck();
 
-    this.gemini.generateContent(this.rawContent, this.category, this.language)
-      .then((result: GeneratedContent) => {
+    // Run generate + validate in parallel
+    Promise.all([
+      this.gemini.generateContent(this.rawContent, this.category, this.language),
+      this.gemini.validateContent(this.rawContent)
+    ])
+      .then(([result, validation]) => {
         this.facebookContent = result.facebook;
         this.instagramContent = result.instagram;
         this.twitterContent = result.twitter;
         this.imageCaption = result.imageCaption;
+        this.validation = validation;
         this.generated = true;
         this.isGenerating = false;
+        this.isValidating = false;
         this.cdr.markForCheck();
       })
       .catch((err: any) => {
         this.geminiError = err?.error?.error || err?.message || 'Could not connect to server. Make sure the backend is running.';
         this.isGenerating = false;
+        this.isValidating = false;
         this.cdr.markForCheck();
       });
   }
@@ -117,7 +129,11 @@ export class EditorComponent {
       instagramContent: this.instagramContent,
       twitterContent: this.twitterContent,
       imageCaption: this.imageCaption,
-      copiedTo: { facebook: false, instagram: false, twitter: false }
+      copiedTo: { facebook: false, instagram: false, twitter: false },
+      validationScore: this.validation?.score ?? null,
+      validationVerdict: this.validation?.verdict ?? '',
+      validationSummary: this.validation?.summary ?? '',
+      validationSources: this.validation?.sources ?? []
     })
     .then(() => {
       this.saved = true;
@@ -139,6 +155,22 @@ export class EditorComponent {
 
   goToHistory() {
     this.router.navigate(['/history']);
+  }
+
+  getValidationColor(): string {
+    const s = this.validation?.score ?? 0;
+    if (s >= 80) return '#2e7d32';
+    if (s >= 60) return '#f57f17';
+    if (s >= 40) return '#e65100';
+    return '#c62828';
+  }
+
+  getValidationBg(): string {
+    const s = this.validation?.score ?? 0;
+    if (s >= 80) return '#f1f8f1';
+    if (s >= 60) return '#fffde7';
+    if (s >= 40) return '#fff3e0';
+    return '#fdf2f2';
   }
 
   get twitterCharCount(): number {
