@@ -1,6 +1,7 @@
 <div class="card">
   <div class="card-title">🖼️ Image Editor</div>
 
+  <!-- Top Controls -->
   <div class="row-fields">
     <mat-form-field appearance="outline" class="field-half">
       <mat-label>Template</mat-label>
@@ -24,29 +25,87 @@
     <span>Image is larger than 5MB. It may take longer to process.</span>
   </div>
 
+  <!-- Fabric.js Editor — shown after photo upload -->
+  <div class="fabric-editor" *ngIf="showEditor">
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Zoom</span>
+        <button mat-icon-button matTooltip="Zoom In" (click)="zoomIn()"><mat-icon>zoom_in</mat-icon></button>
+        <button mat-icon-button matTooltip="Zoom Out" (click)="zoomOut()"><mat-icon>zoom_out</mat-icon></button>
+        <button mat-icon-button matTooltip="Reset Zoom" (click)="resetZoom()"><mat-icon>zoom_out_map</mat-icon></button>
+      </div>
+
+      <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Transform</span>
+        <button mat-icon-button matTooltip="Rotate Left" (click)="rotateLeft()"><mat-icon>rotate_left</mat-icon></button>
+        <button mat-icon-button matTooltip="Rotate Right" (click)="rotateRight()"><mat-icon>rotate_right</mat-icon></button>
+        <button mat-icon-button matTooltip="Flip Horizontal" (click)="flipHorizontal()"><mat-icon>flip</mat-icon></button>
+        <button mat-icon-button matTooltip="Flip Vertical" (click)="flipVertical()"><mat-icon style="transform:rotate(90deg)">flip</mat-icon></button>
+      </div>
+
+      <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+      <div class="toolbar-group text-group">
+        <span class="toolbar-label">Add Text</span>
+        <input class="text-input" [(ngModel)]="overlayText" placeholder="Type text..." (keyup.enter)="addText()">
+        <button mat-icon-button matTooltip="Add Text" (click)="addText()" color="primary"><mat-icon>text_fields</mat-icon></button>
+      </div>
+
+      <mat-divider [vertical]="true" class="toolbar-divider"></mat-divider>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Actions</span>
+        <button mat-icon-button matTooltip="Delete Selected" (click)="deleteSelected()" color="warn"><mat-icon>delete_outline</mat-icon></button>
+        <button mat-icon-button matTooltip="Undo" (click)="undo()" [disabled]="!canUndo"><mat-icon>undo</mat-icon></button>
+      </div>
+
+    </div>
+
+    <!-- Canvas -->
+    <div class="canvas-wrapper">
+      <canvas #fabricCanvas></canvas>
+    </div>
+
+    <p class="editor-hint">
+      <mat-icon>info_outline</mat-icon>
+      Click any object to select it. Drag to move. Use handles to resize/rotate.
+    </p>
+
+  </div>
+
+  <!-- Caption -->
   <mat-form-field appearance="outline" class="full-width">
     <mat-label>Image Caption (shown on banner)</mat-label>
     <input matInput [ngModel]="caption" (ngModelChange)="onCaptionChange($event)" placeholder="Short caption for the image...">
   </mat-form-field>
 
+  <!-- Generate & Download -->
   <div class="action-row">
-    <button mat-stroked-button (click)="generatePreview()" [disabled]="isGenerating">
+    <button mat-raised-button color="primary" (click)="applyAndGenerate()" [disabled]="isGenerating || !selectedFile">
       <mat-spinner *ngIf="isGenerating" diameter="18"></mat-spinner>
-      <mat-icon *ngIf="!isGenerating">preview</mat-icon>
-      {{ isGenerating ? 'Generating...' : 'Generate Preview' }}
+      <mat-icon *ngIf="!isGenerating">auto_fix_high</mat-icon>
+      {{ isGenerating ? 'Generating...' : 'Apply Edits & Generate Preview' }}
     </button>
 
-    <button mat-raised-button color="primary" (click)="downloadImage()" [disabled]="!previewUrl" class="download-btn">
+    <button mat-stroked-button color="primary" (click)="downloadImage()" [disabled]="!previewUrl" class="download-btn">
       <mat-icon>download</mat-icon> Download Image
     </button>
   </div>
 
+  <!-- Final Preview -->
   <div class="preview-container" *ngIf="previewUrl">
+    <div class="preview-label">Final Preview</div>
     <img [src]="previewUrl" alt="Generated news image" class="preview-img">
   </div>
 
-  <div class="preview-placeholder" *ngIf="!previewUrl">
+  <div class="preview-placeholder" *ngIf="!previewUrl && !showEditor">
     <mat-icon>image</mat-icon>
-    <span>Image preview will appear here</span>
+    <span>Upload a photo to start editing</span>
   </div>
+
 </div>

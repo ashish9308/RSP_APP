@@ -192,6 +192,49 @@ frontend/src/app/
 
 ---
 
+## PHASE 5 — Fabric.js Image Editor
+> Add interactive image editing (crop, zoom, move, add text overlays) on the uploaded news photo before it gets placed into the template.
+
+### 5.1 Install Fabric.js
+- [x] Install fabric package
+  ```bash
+  cd frontend
+  npm install fabric
+  npm install @types/fabric --save-dev
+  ```
+
+### 5.2 Updated Flow
+> Old: Upload photo → Generate Preview → Download
+> New: Upload photo → **Fabric.js Editor** (crop/zoom/move/text) → Apply Edits → Generate Preview → Download
+
+### 5.3 Files to Change
+- [x] `image-editor.component.ts` — add Fabric.js canvas logic, toolbar actions, apply edits
+- [x] `image-editor.component.html` — add Fabric canvas element + toolbar (move, zoom, crop, add text, delete, undo)
+- [x] `image-editor.component.scss` — toolbar and fabric canvas styles
+- [x] `canvas.service.ts` — no changes needed (receives edited image dataUrl as before)
+
+### 5.4 Toolbar Features
+- [x] Move/Pan uploaded photo on canvas
+- [x] Zoom In / Zoom Out / Reset Zoom
+- [x] Rotate Left / Rotate Right
+- [x] Flip Horizontal / Flip Vertical
+- [x] Add text overlay on photo (with shadow, bold, white)
+- [x] Delete selected object
+- [x] Undo last action (up to 20 steps)
+- [x] Apply Edits & Generate Preview button
+
+### 5.5 Testing Checklist
+- [x] Upload photo → Fabric editor appears with photo loaded
+- [x] Can move/reposition photo
+- [x] Can zoom in and out
+- [x] Can add text overlay on photo
+- [x] Can delete added text
+- [x] Can undo actions
+- [x] Apply Edits → photo placed correctly in template
+- [x] Download image works as before
+
+---
+
 ## PHASE 4 — Integration & Full App Testing
 
 ### 4.1 End-to-End Flow Testing
@@ -249,6 +292,11 @@ frontend/src/app/
 - [x] Button shows "Saved! ✓" checkmark after saving ✅
 - [x] **PHASE 4 COMPLETE** — Integration & Full App Testing ✅
 - [x] **🎉 ALL PHASES COMPLETE — APP IS FULLY FUNCTIONAL**
+- [ ] **PHASE 5 — Fabric.js Image Editor** ← In Progress
+- [x] Fabric.js v7 installed ✅
+- [x] Fabric canvas with full toolbar implemented ✅
+- [x] Build passes with zero errors ✅
+- [x] **PHASE 5 COMPLETE** — Fabric.js Image Editor ✅
 
 ---
 
