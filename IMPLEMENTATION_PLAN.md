@@ -235,6 +235,49 @@ frontend/src/app/
 
 ---
 
+## PHASE 6 — Advanced Caption Editor
+> Enhance the image caption system with multiple captions, drag/resize on preview, and per-caption styling.
+
+### 6.1 Caption Enhancements
+- [x] Multiple captions — `+` button to add, `−` button to remove
+- [x] First caption pre-filled from generated content by default
+- [x] Each caption is a draggable, resizable `IText` object on the preview Fabric canvas
+- [x] Captions start in the footer area (y=1066–1280) but can be dragged anywhere
+- [x] Per-caption text alignment — Left / Center / Right toggle buttons
+- [x] Per-caption text colour picker (native colour input, opacity-0 overlay on swatch)
+- [x] Per-caption background colour picker with "No Background" (transparent) reset button
+- [x] Download exports preview Fabric canvas at full 1024×1280 with captions at final positions
+
+### 6.2 Files Changed
+- [x] `image-editor.component.ts` — `CaptionConfig` interface (`text`, `align`, `color`, `bgColor`); `captions[]` array replaces single string; `setCaptionAlign()`, `addCaption()`, `removeCaption()`; `initPreviewFabric()` applies all caption styles to Fabric `IText`
+- [x] `image-editor.component.html` — caption blocks with text input, align buttons, colour swatches
+- [x] `image-editor.component.scss` — `.caption-block`, `.caption-style-row`, `.colour-swatch`, `.colour-input` (opacity-0 fix for native colour picker)
+- [x] `canvas.service.ts` — caption drawing removed (now handled by Fabric.js on preview canvas)
+
+### 6.3 Key Fix — colour picker not opening
+- `<input type="color" hidden>` blocks the browser from opening the native picker
+- **Fix:** Use `opacity: 0; position: absolute; inset: 0` via `.colour-input` class instead
+
+### 6.4 Key Fix — uploaded image not rendering in template
+- Fabric canvas export (640×480 with dark background) was being passed to `canvas.service` instead of the original file
+- **Fix:** Pass `this.selectedFile` (original upload) directly to `canvas.service.generateImage()` — Fabric editor is for visual adjustments only; the final composite always uses the original photo
+
+### 6.5 Testing Checklist
+- [x] First caption pre-filled on load
+- [x] `+` button adds new caption with default white text, transparent BG, center align
+- [x] `−` button removes caption (hidden when only one caption)
+- [x] Left / Center / Right align buttons highlight active selection
+- [x] Text colour swatch opens native colour picker on click
+- [x] BG colour swatch opens native colour picker on click
+- [x] "No BG" button resets background to transparent
+- [x] Apply Edits → template renders correctly with photo in black area
+- [x] Captions appear on preview canvas in footer area with correct styles
+- [x] Captions are draggable and resizable on preview canvas
+- [x] Download exports full 1024×1280 image with captions at final positions
+- [x] **PHASE 6 COMPLETE** ✅
+
+---
+
 ## PHASE 4 — Integration & Full App Testing
 
 ### 4.1 End-to-End Flow Testing
@@ -297,6 +340,12 @@ frontend/src/app/
 - [x] Fabric canvas with full toolbar implemented ✅
 - [x] Build passes with zero errors ✅
 - [x] **PHASE 5 COMPLETE** — Fabric.js Image Editor ✅
+- [x] **PHASE 6 COMPLETE** — Advanced Caption Editor ✅
+  - Multiple captions with `+` / `−` buttons
+  - Draggable & resizable captions on preview Fabric canvas
+  - Per-caption: text align (L/C/R), text colour picker, background colour picker
+  - Fixed: colour picker not opening (`hidden` → `opacity:0` CSS fix)
+  - Fixed: uploaded image not rendering in template (pass `selectedFile` directly to `canvas.service`)
 
 ---
 

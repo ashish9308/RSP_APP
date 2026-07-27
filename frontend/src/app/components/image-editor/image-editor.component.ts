@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectorRef, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectorRef, AfterViewInit, ElementRef, ViewChild, ViewChildren, QueryList, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -21,6 +21,13 @@ const TEMPLATES = [
   { label: 'Business',      file: 'business.png' },
 ];
 
+interface CaptionConfig {
+  text: string;
+  align: 'left' | 'center' | 'right';
+  color: string;
+  bgColor: string;
+}
+
 @Component({
   selector: 'app-image-editor',
   standalone: true,
@@ -37,6 +44,9 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
   @Input() caption = '';
   @Output() captionChange = new EventEmitter<string>();
   @ViewChild('fabricCanvas') fabricCanvasRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('previewCanvas') previewCanvasRef!: ElementRef<HTMLCanvasElement>;
+
+  captions: CaptionConfig[] = [{ text: '', align: 'center', color: '#ffffff', bgColor: 'transparent' }];
 
   templates = TEMPLATES;
   selectedTemplate = TEMPLATES[0].file;
@@ -45,19 +55,25 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
   isGenerating = false;
   showEditor = false;
   overlayText = '';
+  showPreviewEditor = false;
 
   imageSizeWarning = false;
   readonly maxImageSize = 5 * 1024 * 1024;
 
   private fabricCanvas: fabric.Canvas | null = null;
+  private previewFabric: fabric.Canvas | null = null;
   private history: string[] = [];
 
-  constructor(private canvas: CanvasService, private snackBar: MatSnackBar, private cdr: ChangeDetectorRef) {}
+  constructor(private canvas: CanvasService, private snackBar: MatSnackBar, public cdr: ChangeDetectorRef) {}
 
-  ngAfterViewInit() {}
+  ngAfterViewInit() {
+    // Pre-fill first caption from @Input
+    if (this.caption) this.captions[0].text = this.caption;
+  }
 
   ngOnDestroy() {
     this.fabricCanvas?.dispose();
+    this.previewFabric?.dispose();
   }
 
   onFileSelected(event: Event) {
@@ -194,28 +210,42 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
     if (obj) { obj.set('angle', (obj.angle || 0) + 90); this.fabricCanvas.renderAll(); this.saveHistory(); }
   }
 
-  applyAndGenerate() {
-    if (!this.fabricCanvas) return;
-    if (!this.caption.trim()) {
-      this.snackBar.open('Please enter a caption', '', { duration: 2500 });
-      return;
+  addCaption() {
+    this.captions.push({ text: '', align: 'center', color: '#ffffff', bgColor: 'transparent' });
+    this.cdr.markForCheck();
+  }
+
+  removeCaption(index: number) {
+    if (this.captions.length > 1) {
+      this.captions.splice(index, 1);
+      this.cdr.markForCheck();
     }
+  }
+
+  setCaptionAlign(index: number, align: 'left' | 'center' | 'right') {
+    this.captions[index].align = align;
+    this.cdr.markForCheck();
+  }
+
+  trackByIndex(index: number) { return index; }
+
+  applyAndGenerate() {
+    if (!this.fabricCanvas || !this.selectedFile) return;
     this.isGenerating = true;
     this.cdr.markForCheck();
 
-    const editedDataUrl = this.fabricCanvas.toDataURL({ format: 'jpeg', quality: 0.95, multiplier: 1 });
-
-    fetch(editedDataUrl)
-      .then(r => r.blob())
-      .then(blob => {
-        const editedFile = new File([blob], 'edited.jpg', { type: 'image/jpeg' });
-        const templateSrc = `templates/${this.selectedTemplate}`;
-        return this.canvas.generateImage(templateSrc, editedFile, this.caption);
-      })
+    // Use the original uploaded file directly — canvas.service cover-fits it
+    // into the template's black area (y=206 to y=1066) exactly as before.
+    // The Fabric editor adjustments (zoom/rotate/flip) are for visual reference;
+    // the final composite is built from the original photo + selected template.
+    const templateSrc = `templates/${this.selectedTemplate}`;
+    this.canvas.generateImage(templateSrc, this.selectedFile)
       .then((dataUrl) => {
         this.previewUrl = dataUrl;
         this.isGenerating = false;
+        this.showPreviewEditor = true;
         this.cdr.markForCheck();
+        setTimeout(() => this.initPreviewFabric(dataUrl), 150);
       })
       .catch((err: any) => {
         this.snackBar.open('Image generation failed: ' + err.message, 'Close', { duration: 4000 });
@@ -224,15 +254,71 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
       });
   }
 
+  private initPreviewFabric(bgDataUrl: string) {
+    if (this.previewFabric) {
+      this.previewFabric.dispose();
+      this.previewFabric = null;
+    }
+    const canvasEl = this.previewCanvasRef?.nativeElement;
+    if (!canvasEl) return;
+
+    // Display at 480px wide, proportional height from 1024x1280
+    const displayW = 480;
+    const displayH = Math.round(1280 * displayW / 1024); // 600px
+    const scale = displayW / 1024;
+
+    this.previewFabric = new fabric.Canvas(canvasEl, { width: displayW, height: displayH });
+
+    // Load the fully composited template image (header + photo + footer) as background
+    fabric.FabricImage.fromURL(bgDataUrl).then((img) => {
+      // img.width = 1024, img.height = 1280 — scale down to displayW x displayH
+      img.set({
+        left: 0, top: 0,
+        scaleX: scale, scaleY: scale,
+        selectable: false, evented: false,
+        originX: 'left', originY: 'top'
+      });
+      this.previewFabric!.add(img);
+
+      // Place initial captions in the footer area as draggable IText objects
+      const footerMidY = Math.round((1066 + 107) * scale);
+      this.captions.filter(c => c.text.trim()).forEach((cap, i) => {
+        const leftPos = cap.align === 'left' ? 10 : cap.align === 'right' ? displayW - 10 : displayW / 2;
+        const originX = cap.align === 'left' ? 'left' : cap.align === 'right' ? 'right' : 'center';
+        const t = new fabric.IText(cap.text, {
+          left: leftPos,
+          top: footerMidY + i * 30,
+          originX,
+          originY: 'center',
+          textAlign: cap.align,
+          fontSize: 18,
+          fill: cap.color,
+          backgroundColor: cap.bgColor === 'transparent' ? '' : cap.bgColor,
+          fontFamily: '"Noto Sans Devanagari", Arial, sans-serif',
+          fontWeight: 'bold',
+          shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.9)', blur: 6, offsetX: 2, offsetY: 2 })
+        });
+        this.previewFabric!.add(t);
+      });
+
+      this.previewFabric!.renderAll();
+      this.cdr.markForCheck();
+    });
+  }
+
   downloadImage() {
-    if (!this.previewUrl) return;
+    if (!this.previewFabric) return;
     const timestamp = new Date().toISOString().slice(0, 10);
-    this.canvas.downloadImage(this.previewUrl, `rsp-news-${timestamp}.jpg`);
+    // displayW=480, template=1024 → multiplier = 1024/480
+    const multiplier = 1024 / 480;
+    const dataUrl = this.previewFabric.toDataURL({ format: 'jpeg', quality: 0.92, multiplier });
+    this.canvas.downloadImage(dataUrl, `rsp-news-${timestamp}.jpg`);
   }
 
   onCaptionChange(value: string) {
     this.caption = value;
     this.captionChange.emit(value);
+    if (this.captions.length > 0) this.captions[0].text = value;
   }
 
   get canUndo(): boolean {

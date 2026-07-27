@@ -17,7 +17,7 @@ const CAPTION_H = 214;
 @Injectable({ providedIn: 'root' })
 export class CanvasService {
 
-  generateImage(templateSrc: string, newsImageFile: File, caption: string): Promise<string> {
+  generateImage(templateSrc: string, newsImageFile: File, caption: string = ''): Promise<string> {
     return new Promise((resolve, reject) => {
       const canvas = document.createElement('canvas');
       canvas.width = TEMPLATE_W;
@@ -46,16 +46,6 @@ export class CanvasService {
             // Draw footer portion only (y=1066 to y=1280)
             ctx.drawImage(template, 0, CAPTION_Y_START, TEMPLATE_W, CAPTION_H, 0, CAPTION_Y_START, TEMPLATE_W, CAPTION_H);
 
-            // Step 4: Draw caption text centered in footer area
-            const fontSize = 52;
-            ctx.fillStyle = '#FFFFFF';
-            ctx.font = `bold ${fontSize}px "Noto Sans Devanagari", "Arial Unicode MS", Arial`;
-            ctx.textAlign = 'center';
-            const centerX = TEMPLATE_W / 2;
-            // Start text in vertical center of footer
-            const textStartY = CAPTION_Y_START + (CAPTION_H / 2) - 20;
-            this.wrapText(ctx, caption, centerX, textStartY, TEMPLATE_W - 80, fontSize + 10);
-
             resolve(canvas.toDataURL('image/jpeg', 0.92));
           };
           template.src = templateSrc;
@@ -78,34 +68,6 @@ export class CanvasService {
     const offsetX = (w - scaledW) / 2;
     const offsetY = (h - scaledH) / 2;
     ctx.drawImage(img, x + offsetX, y + offsetY, scaledW, scaledH);
-  }
-
-  private wrapText(
-    ctx: CanvasRenderingContext2D,
-    text: string, x: number, y: number,
-    maxWidth: number, lineHeight: number
-  ) {
-    const words = text.split(' ');
-    let line = '';
-    const lines: string[] = [];
-    for (const word of words) {
-      const test = line + word + ' ';
-      if (ctx.measureText(test).width > maxWidth && line !== '') {
-        lines.push(line.trim());
-        line = word + ' ';
-      } else {
-        line = test;
-      }
-    }
-    if (line.trim()) lines.push(line.trim());
-
-    // Center lines vertically in footer
-    const totalHeight = lines.length * lineHeight;
-    let startY = y - totalHeight / 2 + lineHeight / 2;
-    for (const l of lines) {
-      ctx.fillText(l, x, startY);
-      startY += lineHeight;
-    }
   }
 
   downloadImage(dataUrl: string, filename: string) {

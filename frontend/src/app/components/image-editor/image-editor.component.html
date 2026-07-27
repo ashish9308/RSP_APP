@@ -78,11 +78,75 @@
 
   </div>
 
-  <!-- Caption -->
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Image Caption (shown on banner)</mat-label>
-    <input matInput [ngModel]="caption" (ngModelChange)="onCaptionChange($event)" placeholder="Short caption for the image...">
-  </mat-form-field>
+  <!-- Captions -->
+  <div class="captions-section">
+    <div class="captions-header">
+      <span class="captions-label">Image Captions (shown on banner)</span>
+      <button mat-icon-button matTooltip="Add Caption" (click)="addCaption()" color="primary">
+        <mat-icon>add_circle</mat-icon>
+      </button>
+    </div>
+
+    <div class="caption-block" *ngFor="let cap of captions; let i = index; trackBy: trackByIndex">
+      <!-- Text input row -->
+      <div class="caption-input-row">
+        <mat-form-field appearance="outline" class="caption-field">
+          <mat-label>Caption {{ captions.length > 1 ? (i + 1) : '' }}</mat-label>
+          <input matInput [(ngModel)]="captions[i].text" placeholder="Short caption for the image...">
+        </mat-form-field>
+        <button mat-icon-button color="warn" matTooltip="Remove" (click)="removeCaption(i)" *ngIf="captions.length > 1">
+          <mat-icon>remove_circle_outline</mat-icon>
+        </button>
+      </div>
+
+      <!-- Style controls row -->
+      <div class="caption-style-row">
+        <!-- Alignment -->
+        <div class="style-group">
+          <span class="style-label">Align</span>
+          <button mat-icon-button matTooltip="Align Left"
+            [class.active-align]="cap.align === 'left'"
+            (click)="setCaptionAlign(i, 'left')">
+            <mat-icon>format_align_left</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Align Center"
+            [class.active-align]="cap.align === 'center'"
+            (click)="setCaptionAlign(i, 'center')">
+            <mat-icon>format_align_center</mat-icon>
+          </button>
+          <button mat-icon-button matTooltip="Align Right"
+            [class.active-align]="cap.align === 'right'"
+            (click)="setCaptionAlign(i, 'right')">
+            <mat-icon>format_align_right</mat-icon>
+          </button>
+        </div>
+
+        <!-- Text colour -->
+        <div class="style-group">
+          <span class="style-label">Text</span>
+          <label class="colour-swatch" [style.background]="cap.color" matTooltip="Text colour">
+            <input type="color" class="colour-input" [(ngModel)]="captions[i].color">
+          </label>
+        </div>
+
+        <!-- Background colour -->
+        <div class="style-group">
+          <span class="style-label">BG</span>
+          <label class="colour-swatch"
+            [style.background]="cap.bgColor === 'transparent' ? '#ffffff' : cap.bgColor"
+            [class.swatch-transparent]="cap.bgColor === 'transparent'"
+            matTooltip="Background colour">
+            <input type="color" class="colour-input" [(ngModel)]="captions[i].bgColor">
+          </label>
+          <button mat-icon-button matTooltip="No background" class="no-bg-btn"
+            [class.active-align]="cap.bgColor === 'transparent'"
+            (click)="captions[i].bgColor = 'transparent'; cdr.markForCheck()">
+            <mat-icon>format_color_reset</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- Generate & Download -->
   <div class="action-row">
@@ -92,15 +156,20 @@
       {{ isGenerating ? 'Generating...' : 'Apply Edits & Generate Preview' }}
     </button>
 
-    <button mat-stroked-button color="primary" (click)="downloadImage()" [disabled]="!previewUrl" class="download-btn">
+    <button mat-stroked-button color="primary" (click)="downloadImage()" [disabled]="!showPreviewEditor" class="download-btn">
       <mat-icon>download</mat-icon> Download Image
     </button>
   </div>
 
-  <!-- Final Preview -->
-  <div class="preview-container" *ngIf="previewUrl">
-    <div class="preview-label">Final Preview</div>
-    <img [src]="previewUrl" alt="Generated news image" class="preview-img">
+  <!-- Preview Fabric Canvas (draggable captions) -->
+  <div class="preview-container" *ngIf="showPreviewEditor">
+    <div class="preview-label">
+      Final Preview
+      <span class="preview-hint">— drag captions to reposition, use handles to resize</span>
+    </div>
+    <div class="canvas-wrapper preview-canvas-wrapper">
+      <canvas #previewCanvas></canvas>
+    </div>
   </div>
 
   <div class="preview-placeholder" *ngIf="!previewUrl && !showEditor">
