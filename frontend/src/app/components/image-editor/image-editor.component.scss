@@ -1,0 +1,104 @@
+.card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.row-fields {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.field-half {
+  flex: 1;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.upload-area {
+  display: flex;
+  align-items: center;
+
+  .upload-btn {
+    width: 100%;
+    height: 56px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.size-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  color: #f57f17;
+  font-size: 13px;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; flex-shrink: 0; }
+}
+
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 42px;
+  }
+}
+
+.download-btn {
+  margin-left: auto;
+}
+
+.preview-container {
+  margin-top: 8px;
+  text-align: center;
+
+  .preview-img {
+    max-width: 100%;
+    width: 480px;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  }
+}
+
+.preview-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  color: #aaa;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}

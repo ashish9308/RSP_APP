@@ -1,0 +1,91 @@
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="app-header">
+    <button mat-icon-button (click)="goBack()" matTooltip="Back to Editor">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <span class="header-title">📋 Post History</span>
+    <div class="search-box">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search posts...</mat-label>
+        <input matInput [(ngModel)]="searchKeyword" (ngModelChange)="search()" placeholder="keyword...">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="filteredPosts.length === 0">
+    <mat-icon>inbox</mat-icon>
+    <p>No posts saved yet. Go generate some content!</p>
+    <button mat-raised-button color="primary" (click)="goBack()">Go to Editor</button>
+  </div>
+
+  <!-- Posts List -->
+  <div class="post-card" *ngFor="let post of filteredPosts">
+
+    <div class="post-header">
+      <span class="category-badge" [style.background]="getCategoryColor(post.category)">
+        {{ post.category }}
+      </span>
+      <span class="post-date">{{ post.createdAt | date:'dd MMM yyyy, h:mm a' }}</span>
+      <span class="post-lang">{{ post.language }}</span>
+      <button mat-icon-button color="warn" (click)="deletePost(post)" matTooltip="Delete post" class="delete-btn">
+        <mat-icon>delete_outline</mat-icon>
+      </button>
+    </div>
+
+    <p class="raw-preview">{{ post.rawContent | slice:0:120 }}{{ post.rawContent.length > 120 ? '...' : '' }}</p>
+
+    <div class="platform-actions">
+
+      <!-- Facebook -->
+      <div class="platform-row">
+        <button mat-stroked-button class="platform-btn facebook-btn" (click)="copyContent(post, 'facebook')">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copy Facebook</span>
+          <mat-icon class="copied-icon" *ngIf="post.copiedTo.facebook" matTooltip="Already copied">check_circle</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleExpand(post._id!, 'facebook')" matTooltip="Preview content">
+          <mat-icon>{{ isExpanded(post._id!, 'facebook') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+      <div class="content-preview" *ngIf="isExpanded(post._id!, 'facebook')">
+        {{ post.facebookContent }}
+      </div>
+
+      <!-- Instagram -->
+      <div class="platform-row">
+        <button mat-stroked-button class="platform-btn instagram-btn" (click)="copyContent(post, 'instagram')">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copy Instagram</span>
+          <mat-icon class="copied-icon" *ngIf="post.copiedTo.instagram" matTooltip="Already copied">check_circle</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleExpand(post._id!, 'instagram')" matTooltip="Preview content">
+          <mat-icon>{{ isExpanded(post._id!, 'instagram') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+      <div class="content-preview" *ngIf="isExpanded(post._id!, 'instagram')">
+        {{ post.instagramContent }}
+      </div>
+
+      <!-- Twitter -->
+      <div class="platform-row">
+        <button mat-stroked-button class="platform-btn twitter-btn" (click)="copyContent(post, 'twitter')">
+          <mat-icon>content_copy</mat-icon>
+          <span>Copy Twitter/X</span>
+          <mat-icon class="copied-icon" *ngIf="post.copiedTo.twitter" matTooltip="Already copied">check_circle</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleExpand(post._id!, 'twitter')" matTooltip="Preview content">
+          <mat-icon>{{ isExpanded(post._id!, 'twitter') ? 'expand_less' : 'expand_more' }}</mat-icon>
+        </button>
+      </div>
+      <div class="content-preview" *ngIf="isExpanded(post._id!, 'twitter')">
+        {{ post.twitterContent }}
+      </div>
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,141 @@
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="app-header">
+    <div class="header-left">
+      <mat-icon class="header-icon">newspaper</mat-icon>
+      <span class="header-title">RSP News Publisher</span>
+    </div>
+    <button mat-stroked-button (click)="goToHistory()">
+      <mat-icon>history</mat-icon> History
+    </button>
+  </div>
+
+  <!-- Input Section -->
+  <div class="card">
+    <div class="card-title">📝 News Content</div>
+
+    <div class="row-fields">
+      <mat-form-field appearance="outline" class="field-half">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="category">
+          <mat-option *ngFor="let c of categories" [value]="c">{{ c }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="field-half">
+        <mat-label>Language</mat-label>
+        <mat-select [(ngModel)]="language">
+          <mat-option *ngFor="let l of languages" [value]="l">{{ l }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Paste your raw news content here...</mat-label>
+      <textarea matInput [(ngModel)]="rawContent" rows="6" placeholder="Paste the news article or key points..."></textarea>
+    </mat-form-field>
+
+    <div class="action-row">
+      <button mat-raised-button color="primary" (click)="generate()" [disabled]="isGenerating">
+        <mat-spinner *ngIf="isGenerating" diameter="18" class="btn-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isGenerating">auto_awesome</mat-icon>
+        {{ isGenerating ? 'Generating...' : 'Generate Content' }}
+      </button>
+    </div>
+
+    <!-- Gemini Error Banner -->
+    <div class="error-banner" *ngIf="geminiError">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ geminiError }}</span>
+      <button mat-icon-button (click)="geminiError = ''" class="close-error"><mat-icon>close</mat-icon></button>
+    </div>
+  </div>
+
+  <!-- Generated Content Section -->
+  <div class="card" *ngIf="generated">
+    <div class="card-title">✨ Generated Content</div>
+
+    <mat-tab-group animationDuration="200ms">
+
+      <!-- Facebook Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon facebook-color">thumb_up</mat-icon> Facebook
+        </ng-template>
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Facebook Post</mat-label>
+            <textarea matInput [(ngModel)]="facebookContent" rows="8"></textarea>
+            <mat-hint align="end">{{ facebookContent.length }} chars</mat-hint>
+          </mat-form-field>
+          <button mat-raised-button class="copy-btn facebook-btn" (click)="copyToClipboard('facebook')">
+            <mat-icon>content_copy</mat-icon> Copy Facebook Content
+          </button>
+        </div>
+      </mat-tab>
+
+      <!-- Instagram Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon instagram-color">photo_camera</mat-icon> Instagram
+        </ng-template>
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Instagram Caption</mat-label>
+            <textarea matInput [(ngModel)]="instagramContent" rows="8"></textarea>
+            <mat-hint align="end">{{ instagramContent.length }} chars</mat-hint>
+          </mat-form-field>
+          <button mat-raised-button class="copy-btn instagram-btn" (click)="copyToClipboard('instagram')">
+            <mat-icon>content_copy</mat-icon> Copy Instagram Content
+          </button>
+        </div>
+      </mat-tab>
+
+      <!-- Twitter Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon class="tab-icon twitter-color">tag</mat-icon> Twitter / X
+        </ng-template>
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tweet</mat-label>
+            <textarea matInput [(ngModel)]="twitterContent" rows="4"></textarea>
+            <mat-hint align="end" [class.over-limit]="twitterOverLimit">
+              {{ twitterCharCount }} / {{ twitterLimit }}
+            </mat-hint>
+          </mat-form-field>
+          <div class="twitter-warning" *ngIf="twitterOverLimit">
+            ⚠️ Tweet exceeds 280 characters. Please shorten it.
+          </div>
+          <button mat-raised-button class="copy-btn twitter-btn" (click)="copyToClipboard('twitter')">
+            <mat-icon>content_copy</mat-icon> Copy Twitter Content
+          </button>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+
+    <!-- Save Buttons inside generated card -->
+    <div class="save-row">
+      <button mat-raised-button color="accent" (click)="savePost()" [disabled]="isSaving || saved">
+        <mat-spinner *ngIf="isSaving" diameter="18" class="btn-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isSaving && !saved">save</mat-icon>
+        <mat-icon *ngIf="saved">check_circle</mat-icon>
+        {{ isSaving ? 'Saving...' : saved ? 'Saved!' : 'Save to History' }}
+      </button>
+      <button mat-stroked-button color="accent" (click)="saveAndGoToHistory()" [disabled]="isSaving">
+        <mat-icon>history</mat-icon> Save &amp; View History
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Image Editor Section -->
+  <app-image-editor
+    *ngIf="generated"
+    [caption]="imageCaption"
+    (captionChange)="imageCaption = $event">
+  </app-image-editor>
+
+</div>
