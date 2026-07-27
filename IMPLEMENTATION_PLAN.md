@@ -437,6 +437,50 @@ frontend/src/app/
   - Sidebar brand: RSP + "A unit of" + "Synapse Creative Media" + copyright
   - Editor & History pages fully redesigned and theme-matched
   - Navigation-ready sidebar structure for future features
+- [x] **PHASE 8 COMPLETE** — Authentication & User Management ✅
+  - JWT login with bcrypt password hashing
+  - Admin auto-seeded on startup (`admin/admin`, Ashish Kumar)
+  - All API routes protected with JWT middleware
+  - Angular `authGuard` protects editor + history routes
+  - Login page: split layout with RSP banner + themed form
+  - Both sidebars show user avatar (initials), name, role, logout button
+
+---
+
+## PHASE 8 — Authentication & User Management ✅
+> JWT-based login system with role-based access. All API routes protected. Admin user auto-seeded on startup.
+
+### 8.1 Backend — Auth Infrastructure
+- [x] `backend/models/User.js` — username, password (bcrypt hashed), firstName, lastName, role
+- [x] `backend/routes/auth.js` — `POST /api/auth/login` + `POST /api/auth/signup`
+- [x] `backend/middleware/auth.js` — JWT verification middleware for protected routes
+- [x] `backend/seed/seedAdmin.js` — auto-creates `admin/admin` (Ashish Kumar, role: admin) on first startup
+- [x] `backend/server.js` — seed runs on startup, all existing routes protected with JWT
+- [x] `add-user.curl.sh` — shell script ready for adding future users via API
+
+### 8.2 Frontend — Auth Integration
+- [x] `auth.service.ts` — login, logout, token + user storage in localStorage
+- [x] `guards/auth.guard.ts` — redirects to `/login` if not authenticated
+- [x] `post.service.ts` + `gemini.service.ts` — JWT `Authorization` header attached to all API calls
+- [x] Login component — split layout (banner + logo on left, form on right), themed with RSP logo colors
+- [x] `app.routes.ts` — `/login` route added; editor + history routes protected with `authGuard`
+- [x] Both sidebars (Editor + History) — user avatar (initials), full name, role, and logout button at bottom
+
+### 8.3 How to Use
+1. Restart backend: `npm run dev` in the `backend/` folder
+2. Open http://localhost:4200 — redirected to `/login` automatically
+3. Login with `admin` / `admin`
+
+### 8.4 Testing Checklist
+- [x] Unauthenticated access to `/editor` or `/history` redirects to `/login`
+- [x] Login with `admin/admin` succeeds and redirects to editor
+- [x] JWT token stored in localStorage after login
+- [x] All API calls include `Authorization: Bearer <token>` header
+- [x] Logout clears token and redirects to `/login`
+- [x] User avatar, name, and role visible in both sidebars
+- [x] Backend rejects API calls without valid JWT
+- [x] Admin user auto-created on first backend startup
+- [x] **PHASE 8 COMPLETE** — Authentication & User Management ✅
 
 ---
 

@@ -1,0 +1,62 @@
+<div class="login-shell">
+
+  <!-- Left Panel — Banner -->
+  <div class="login-left">
+    <img src="rsp-banner.png" alt="RSP Banner" class="banner-bg">
+  </div>
+
+  <!-- Right Panel — Login Form -->
+  <div class="login-right">
+    <div class="login-card">
+
+      <!-- Brand -->
+      <div class="form-brand">
+        <img src="rsp-logo.jpg" alt="RSP Logo" class="form-brand-logo">
+        <div>
+          <div class="form-brand-title">Ranchi Samachar Patrika</div>
+          <div class="form-brand-unit">A unit of Synapse Creative Media</div>
+        </div>
+      </div>
+
+      <h2 class="form-title">Welcome back</h2>
+      <p class="form-sub">Sign in to your account to continue</p>
+
+      <!-- Error -->
+      <div class="error-box" *ngIf="errorMsg">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMsg }}</span>
+      </div>
+
+      <!-- Form -->
+      <div class="form-group">
+        <label class="field-label">Username</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput [(ngModel)]="username" placeholder="Enter username"
+            (keyup.enter)="login()" autocomplete="username">
+          <mat-icon matPrefix class="field-icon">person_outline</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-group">
+        <label class="field-label">Password</label>
+        <mat-form-field appearance="outline" class="full-width">
+          <input matInput [(ngModel)]="password" [type]="showPassword ? 'text' : 'password'"
+            placeholder="Enter password" (keyup.enter)="login()" autocomplete="current-password">
+          <mat-icon matPrefix class="field-icon">lock_outline</mat-icon>
+          <button mat-icon-button matSuffix type="button" (click)="showPassword = !showPassword" tabindex="-1">
+            <mat-icon>{{ showPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+
+      <button class="login-btn" (click)="login()" [disabled]="isLoading">
+        <mat-spinner *ngIf="isLoading" diameter="20" class="btn-spinner"></mat-spinner>
+        <span *ngIf="!isLoading">Sign In</span>
+      </button>
+
+      <p class="login-footer">© 2026 Ranchi Samachar Patrika</p>
+
+    </div>
+  </div>
+
+</div>

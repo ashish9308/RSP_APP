@@ -13,6 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { GeminiService } from '../../services/gemini.service';
 import { PostService } from '../../services/post.service';
+import { AuthService } from '../../services/auth.service';
 import { CATEGORIES, LANGUAGES, GeneratedContent } from '../../models/post.model';
 import { ImageEditorComponent } from '../image-editor/image-editor.component';
 
@@ -55,7 +56,8 @@ export class EditorComponent {
     private postService: PostService,
     private snackBar: MatSnackBar,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public auth: AuthService
   ) {}
 
   generate() {

@@ -10,6 +10,7 @@ import { MatDialog, MatDialogModule, MAT_DIALOG_DATA, MatDialogRef } from '@angu
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { PostService } from '../../services/post.service';
+import { AuthService } from '../../services/auth.service';
 import { Post } from '../../models/post.model';
 
 @Component({
@@ -59,7 +60,8 @@ export class HistoryComponent implements OnInit {
     private snackBar: MatSnackBar,
     private router: Router,
     private dialog: MatDialog,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public auth: AuthService
   ) {}
 
   async ngOnInit() {

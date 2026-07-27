@@ -144,6 +144,75 @@
   letter-spacing: 0.2px;
 }
 
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #85073f, #2d0f4b);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.user-info { overflow: hidden; }
+
+.user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d4c8e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 10px;
+  color: #5a5a78;
+  text-transform: capitalize;
+  margin-top: 1px;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 12px;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+  }
+
+  &:hover {
+    background: rgba(133,7,83,0.15);
+    color: #e879b8;
+    border-color: rgba(133,7,83,0.3);
+  }
+}
+
 // ─── MAIN CONTENT ────────────────────────────────────────
 .main-content {
   margin-left: 220px;

@@ -26,6 +26,18 @@
     </nav>
 
     <div class="sidebar-bottom">
+      <div class="sidebar-user">
+        <div class="user-avatar">{{ auth.getUser()?.firstName?.charAt(0) }}{{ auth.getUser()?.lastName?.charAt(0) }}</div>
+        <div class="user-info">
+          <div class="user-name">{{ auth.getUser()?.firstName }} {{ auth.getUser()?.lastName }}</div>
+          <div class="user-role">{{ auth.getUser()?.role }}</div>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="auth.logout()" matTooltip="Logout">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+      <div class="sidebar-divider"></div>
       <div class="sidebar-version">v1.0 · RSP Publisher</div>
       <div class="sidebar-copyright">© 2026 Ranchi Samachar Patrika</div>
     </div>
