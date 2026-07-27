@@ -48,6 +48,7 @@ export class EditorComponent {
   geminiError = '';
 
   readonly twitterLimit = 280;
+  readonly currentYear = new Date().getFullYear();
 
   constructor(
     private gemini: GeminiService,

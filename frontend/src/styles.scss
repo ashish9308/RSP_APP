@@ -40,60 +40,27 @@ body {
 * { box-sizing: border-box; }
 
 body {
-  background-color: #f4f5f7 !important;
+  background-color: #f3f4f8 !important;
   font-family: 'Roboto', 'Noto Sans Devanagari', sans-serif;
+  margin: 0;
 }
 
 .mat-mdc-form-field {
   width: 100%;
 }
 
-/* Snackbar success style */
+/* Snackbar */
 .mat-mdc-snack-bar-container {
   --mdc-snackbar-container-color: #323232;
 }
 
-/* Responsive — tablet & mobile */
+/* Responsive helpers */
 @media (max-width: 600px) {
-  .page-wrapper {
-    padding: 10px !important;
-  }
-
-  .row-fields {
-    flex-direction: column !important;
-    gap: 0 !important;
-  }
-
-  .field-half {
-    width: 100% !important;
-  }
-
-  .app-header {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-
-    .search-box .search-field {
-      width: 100% !important;
-    }
-  }
-
   .action-row {
     flex-direction: column !important;
-
-    button {
-      width: 100% !important;
-    }
-
-    .download-btn {
-      margin-left: 0 !important;
-    }
+    button { width: 100% !important; }
+    .download-btn { margin-left: 0 !important; }
   }
-
-  .save-btn {
-    max-width: 100% !important;
-  }
-
-  .preview-img {
-    width: 100% !important;
-  }
+  .save-btn    { max-width: 100% !important; }
+  .preview-img { width: 100% !important; }
 }
