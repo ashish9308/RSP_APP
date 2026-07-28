@@ -36,7 +36,7 @@ Rules:
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: prompt
     });
     const text = response.text.replace(/```json|```/g, '').trim();

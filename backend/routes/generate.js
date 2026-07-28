@@ -19,9 +19,9 @@ Language Preference: ${language || 'Hindi'}
 
 Generate platform-specific social media posts in this exact JSON format ONLY:
 {
-  "facebook": "Engaging Facebook post (200-400 words, use emojis, storytelling tone, end with relevant hashtags)",
-  "instagram": "Instagram caption (80-120 words, energetic tone, 25-30 hashtags at the end on new lines)",
-  "twitter": "Tweet (strictly under 280 characters, punchy, 2-3 hashtags only)",
+  "facebook": "#राँची: <Engaging Facebook post — 200-300 words maximum, use emojis, storytelling tone, end with relevant hashtags>",
+  "instagram": "#राँची: <Instagram caption — 80-120 words, energetic tone, 25-30 hashtags at the end on new lines>",
+  "twitter": "#राँची: <Tweet — strictly under 260 characters after the prefix, punchy, 2-3 hashtags only>",
   "imageCaption": "Short 6-8 word ${language || 'Hindi'} caption for the news image banner (no punctuation at end)"
 }
 Return ONLY valid JSON. No explanation, no markdown, no extra text.
@@ -29,11 +29,16 @@ Return ONLY valid JSON. No explanation, no markdown, no extra text.
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-3.5-flash',
+      model: 'gemini-3.5-flash-lite',
       contents: prompt
     });
     const text = response.text.replace(/```json|```/g, '').trim();
-    res.json(JSON.parse(text));
+    const parsed = JSON.parse(text);
+    // Remove markdown bold/italic markers Gemini sometimes adds
+    parsed.facebook = parsed.facebook?.replace(/\*\*/g, '').replace(/\*/g, '');
+    parsed.instagram = parsed.instagram?.replace(/\*\*/g, '').replace(/\*/g, '');
+    parsed.twitter = parsed.twitter?.replace(/\*\*/g, '').replace(/\*/g, '');
+    res.json(parsed);
   } catch (err) {
     console.error('Gemini error:', err.message);
     res.status(500).json({ error: err.message });
