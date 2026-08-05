@@ -13,12 +13,16 @@ import { CanvasService } from '../../services/canvas.service';
 import * as fabric from 'fabric';
 
 const TEMPLATES = [
+  { label: 'News Update',   file: 'default.png' },
   { label: 'Breaking News', file: 'breaking-news.png' },
   { label: 'Politics',      file: 'politics.png' },
   { label: 'Sports',        file: 'sports.png' },
   { label: 'Entertainment', file: 'entertainment.png' },
   { label: 'Crime',         file: 'crime.png' },
   { label: 'Business',      file: 'business.png' },
+  { label: 'Education',     file: 'education.png' },
+  { label: 'Health',        file: 'health.png' },
+  { label: 'Technology',    file: 'tech.png' }
 ];
 
 interface CaptionConfig {
@@ -46,7 +50,7 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
   @ViewChild('fabricCanvas') fabricCanvasRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('previewCanvas') previewCanvasRef!: ElementRef<HTMLCanvasElement>;
 
-  captions: CaptionConfig[] = [{ text: '', align: 'center', color: '#ffffff', bgColor: 'transparent' }];
+  captions: CaptionConfig[] = [{ text: '', align: 'center', color: '#000000', bgColor: 'transparent' }];
 
   templates = TEMPLATES;
   selectedTemplate = TEMPLATES[0].file;
@@ -63,6 +67,9 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
   private fabricCanvas: fabric.Canvas | null = null;
   private previewFabric: fabric.Canvas | null = null;
   private history: string[] = [];
+  private previewWidth = 1024;
+  private previewHeight = 1280;
+  private captionArea = { x: 0, y: 1066, width: 1024, height: 214 };
 
   constructor(private canvas: CanvasService, private snackBar: MatSnackBar, public cdr: ChangeDetectorRef) {}
 
@@ -111,7 +118,9 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
       const reader = new FileReader();
       reader.onload = (e) => {
         fabric.FabricImage.fromURL(e.target!.result as string).then((img) => {
-          const scale = Math.min(640 / img.width!, 480 / img.height!);
+          // Start in a cover-fit state: the photo fills the complete edit area
+          // (and, in turn, the template's black photo panel) without borders.
+          const scale = Math.max(640 / img.width!, 480 / img.height!);
           img.set({ scaleX: scale, scaleY: scale, left: 320, top: 240, originX: 'center', originY: 'center' });
           this.fabricCanvas!.add(img);
           this.fabricCanvas!.setActiveObject(img);
@@ -211,7 +220,7 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
   }
 
   addCaption() {
-    this.captions.push({ text: '', align: 'center', color: '#ffffff', bgColor: 'transparent' });
+    this.captions.push({ text: '', align: 'center', color: '#000000', bgColor: 'transparent' });
     this.cdr.markForCheck();
   }
 
@@ -234,18 +243,22 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
     this.isGenerating = true;
     this.cdr.markForCheck();
 
-    // Use the original uploaded file directly — canvas.service cover-fits it
-    // into the template's black area (y=206 to y=1066) exactly as before.
-    // The Fabric editor adjustments (zoom/rotate/flip) are for visual reference;
-    // the final composite is built from the original photo + selected template.
+    // Export the Fabric canvas itself. This is the important part: move, zoom,
+    // rotation, flips and added text now all reach the generated preview.
+    this.fabricCanvas.discardActiveObject();
+    this.fabricCanvas.renderAll();
+    const editedImage = this.fabricCanvas.toDataURL({ format: 'png', multiplier: 1 });
     const templateSrc = `templates/${this.selectedTemplate}`;
-    this.canvas.generateImage(templateSrc, this.selectedFile)
-      .then((dataUrl) => {
-        this.previewUrl = dataUrl;
+    this.canvas.generateImage(templateSrc, editedImage)
+      .then((result) => {
+        this.previewUrl = result.dataUrl;
+        this.previewWidth = result.width;
+        this.previewHeight = result.height;
+        this.captionArea = result.captionArea;
         this.isGenerating = false;
         this.showPreviewEditor = true;
         this.cdr.markForCheck();
-        setTimeout(() => this.initPreviewFabric(dataUrl), 150);
+        setTimeout(() => this.initPreviewFabric(result.dataUrl), 150);
       })
       .catch((err: any) => {
         this.snackBar.open('Image generation failed: ' + err.message, 'Close', { duration: 4000 });
@@ -262,16 +275,15 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
     const canvasEl = this.previewCanvasRef?.nativeElement;
     if (!canvasEl) return;
 
-    // Display at 480px wide, proportional height from 1024x1280
+    // Display at 480px wide while preserving each template's actual dimensions.
     const displayW = 480;
-    const displayH = Math.round(1280 * displayW / 1024); // 600px
-    const scale = displayW / 1024;
+    const displayH = Math.round(this.previewHeight * displayW / this.previewWidth);
+    const scale = displayW / this.previewWidth;
 
     this.previewFabric = new fabric.Canvas(canvasEl, { width: displayW, height: displayH });
 
     // Load the fully composited template image (header + photo + footer) as background
     fabric.FabricImage.fromURL(bgDataUrl).then((img) => {
-      // img.width = 1024, img.height = 1280 — scale down to displayW x displayH
       img.set({
         left: 0, top: 0,
         scaleX: scale, scaleY: scale,
@@ -280,23 +292,24 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
       });
       this.previewFabric!.add(img);
 
-      // Place initial captions in the footer area as draggable IText objects
-      const footerMidY = Math.round((1066 + 107) * scale);
+      // Place initial captions in the detected light caption strip, above the
+      // social-media footer. Their positions remain fully draggable afterwards.
+      const captionMidY = Math.round((this.captionArea.y + this.captionArea.height / 2) * scale);
       this.captions.filter(c => c.text.trim()).forEach((cap, i) => {
         const leftPos = cap.align === 'left' ? 10 : cap.align === 'right' ? displayW - 10 : displayW / 2;
         const originX = cap.align === 'left' ? 'left' : cap.align === 'right' ? 'right' : 'center';
         const t = new fabric.IText(cap.text, {
           left: leftPos,
-          top: footerMidY + i * 30,
+          top: captionMidY + i * 30,
           originX,
           originY: 'center',
           textAlign: cap.align,
           fontSize: 18,
           fill: cap.color,
           backgroundColor: cap.bgColor === 'transparent' ? '' : cap.bgColor,
-          fontFamily: '"Noto Sans Devanagari", Arial, sans-serif',
-          fontWeight: 'bold',
-          shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.9)', blur: 6, offsetX: 2, offsetY: 2 })
+          fontFamily: '"Arial, sans-serif',
+          fontWeight: 'bold'
+          //shadow: new fabric.Shadow({ color: 'rgba(0,0,0,0.9)', blur: 6, offsetX: 2, offsetY: 2 })
         });
         this.previewFabric!.add(t);
       });
@@ -309,8 +322,7 @@ export class ImageEditorComponent implements AfterViewInit, OnDestroy {
   downloadImage() {
     if (!this.previewFabric) return;
     const timestamp = new Date().toISOString().slice(0, 10);
-    // displayW=480, template=1024 → multiplier = 1024/480
-    const multiplier = 1024 / 480;
+    const multiplier = this.previewWidth / 480;
     const dataUrl = this.previewFabric.toDataURL({ format: 'jpeg', quality: 0.92, multiplier });
     this.canvas.downloadImage(dataUrl, `rsp-news-${timestamp}.jpg`);
   }

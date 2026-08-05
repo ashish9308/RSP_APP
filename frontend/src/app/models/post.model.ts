@@ -36,6 +36,7 @@ export interface ValidationResult {
 
 export const CATEGORIES = [
   'Breaking News',
+  'News Update',
   'Politics',
   'Sports',
   'Entertainment',
